@@ -1,0 +1,24 @@
+{
+  "name": "dynasty",
+  "version": "1.0.0",
+  "description": "tools for df community to run community rounds",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dfdao/dynasty.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dfdao/dynasty/issues"
+  },
+  "homepage": "https://github.com/dfdao/dynasty#readme",
+  "lint-staged": {
+    "*.ts": "eslint --cache --fix",
+    "*.{ts,css,md,sol}": "prettier --write"
+  }
+}
