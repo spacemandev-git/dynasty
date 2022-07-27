@@ -3,5 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "author": "lermchair",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "prepare": "husky install"
+  }
 }
