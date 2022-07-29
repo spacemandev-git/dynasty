@@ -17,8 +17,26 @@
     "url": "https://github.com/dfdao/dynasty/issues"
   },
   "homepage": "https://github.com/dfdao/dynasty#readme",
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
   "lint-staged": {
-    "*.ts": "eslint --cache --fix",
-    "*.{ts,css,md,sol}": "prettier --write"
+    "**/*.{js,jsx,ts,tsx,css,md}": [
+      "eslint --cache --fix",
+      "prettier --ignore-path .prettierignore --write"
+    ]
+  },
+  "dependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.31.0",
+    "lint-staged": "^13.0.3"
+  },
+  "devDependencies": {
+    "@typescript-eslint/parser": "^5.31.0",
+    "eslint": "^8.20.0",
+    "husky": "^8.0.1",
+    "prettier": "^2.7.1",
+    "typescript": "^4.7.4"
   }
 }

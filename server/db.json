@@ -8,13 +8,18 @@
       "winner": "me",
       "startTime": 10,
       "endTime": 1,
-      "id": 1
+      "id": 1,
+      "configHash": "0x0000000000000000000000000000000000000000000000000000000000000000"
     }
   ],
   "whitelist": [
     {
       "id": 0,
       "address": "0x0a0ef5836d04931bCFc26321a46f6bff6C2E8ADF"
+    },
+    {
+      "id": 1,
+      "address": "0x274c4753194d1b181DEd46958F150ec15b5f604b"
     }
   ]
 }
