@@ -40,8 +40,7 @@ export const RoundList: React.FC<{
           <TableHeader>Name</TableHeader>
           <TableHeader>Start</TableHeader>
           <TableHeader>End</TableHeader>
-          <TableHeader>TimeWeight</TableHeader>
-          <TableHeader>MoveWeight</TableHeader>
+          <TableHeader>Description</TableHeader>
           <TableHeader>Winner</TableHeader>
         </tr>
       </thead>
@@ -51,8 +50,7 @@ export const RoundList: React.FC<{
             <TableCell>{getConfigName(round.configHash)}</TableCell>
             <TableCell>{formatStartTime(round.startTime)}</TableCell>
             <TableCell>{formatStartTime(round.endTime)}</TableCell>
-            <TableCell>{round.timeScoreWeight}</TableCell>
-            <TableCell>{round.moveScoreWeight}</TableCell>
+            <TableCell>{round.description.slice(0, 24) + "..."}</TableCell>
             <TableCell>
               {round.winner && round.winner.length > 0 ? round.winner : "None"}
             </TableCell>

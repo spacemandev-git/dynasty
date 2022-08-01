@@ -31,9 +31,8 @@ await axios
   .post("http://localhost:3000/rounds", {
     message,
     signature,
-    timeScoreWeight: 131,
-    moveScoreWeight: 121,
     winner: "me",
+    description: "adadsasdasdadsadasd",
     startTime: 10,
     endTime: 1,
     configHash: "0x00",

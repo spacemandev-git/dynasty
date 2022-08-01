@@ -79,7 +79,7 @@ export const NewRoundForm: React.FC<{
           if (!configHashStartsWith0x) {
             errors["configHashPrefix"] = "Config hash must start with 0x";
           } else {
-            let error = await configHashGraphQuery(values.configHash);
+            const error = await configHashGraphQuery(values.configHash);
             if (error) {
               errors["configHashGraphQL"] =
                 "Config hash doesn't exist on-chain.";
@@ -87,6 +87,10 @@ export const NewRoundForm: React.FC<{
           }
         } else {
           errors["configHash"] = "Config hash is required.";
+        }
+
+        if (values.description.length === 0) {
+          errors["description"] = "Description is required.";
         }
 
         // validate start and end times
@@ -103,27 +107,14 @@ export const NewRoundForm: React.FC<{
       {(formik) => (
         <Form onSubmit={formik.handleSubmit}>
           <FormItem>
-            <Label>Scoring Formula</Label>
-            <FormulaContainer>
-              <FormulaInput
-                placeholder="timeScoreWeight"
-                id="timeScoreWeight"
-                name="timeScoreWeight"
-                onChange={formik.handleChange}
-                type="number"
-                value={formik.values.timeScoreWeight}
-              />
-              <span>× playerTime × (1 + (</span>
-              <FormulaInput
-                placeholder="moveScoreWeight"
-                id="moveScoreWeight"
-                name="moveScoreWeight"
-                onChange={formik.handleChange}
-                value={formik.values.moveScoreWeight}
-                type="number"
-              />
-              <span> × playerMoves) ÷ 1000)</span>
-            </FormulaContainer>
+            <Label>Description</Label>
+            <TextAreaInput
+              name="description"
+              id="description"
+              value={formik.values.description}
+              onChange={formik.handleChange}
+              placeholder="A short description of the round ruleset."
+            />
           </FormItem>
           <div
             style={{
@@ -218,23 +209,21 @@ export const TextInput = styled.input`
   }
 `;
 
-const FormulaInput = styled(TextInput)`
-  padding: 4px;
-  text-decoration: none;
-  outline: none;
+const TextAreaInput = styled.textarea`
+  padding: 0.5rem 1rem;
+  border: 2px solid #e5e5e5;
+  border-radius: 4px;
+  background: #fff;
+  transition: border-color 0.2s ease-in-out;
+  font-family: sans-serif;
+  &:hover {
+    border-color: #349dff;
+  }
 `;
 
 const Label = styled.label`
   width: 100%;
   text-align: left;
-`;
-
-const FormulaContainer = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 8px;
-  border: 1px solid #e3cca0;
-  border-radius: 4px;
 `;
 
 const Form = styled.form`

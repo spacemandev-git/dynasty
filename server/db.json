@@ -9,7 +9,15 @@
       "startTime": 10,
       "endTime": 1,
       "id": 1,
-      "configHash": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      "configHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "description": "Something something something ruleset."
+    },
+    {
+      "description": "fjkgdsahghdkflhkaasdfsdf",
+      "startTime": 1659383103265,
+      "endTime": 1659555903265,
+      "configHash": "0x55911a7c9a236e6cdc1f4e8b63362668eff237a9d0d3c242ff1f5c27901b079d",
+      "id": 2
     }
   ],
   "whitelist": [

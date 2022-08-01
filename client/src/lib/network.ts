@@ -27,9 +27,8 @@ export const getURLSearchParmsForRound = (
   return new URLSearchParams({
     endTime: round.endTime.toString(),
     startTime: round.startTime.toString(),
-    timeScoreWeight: round.timeScoreWeight.toString(),
-    moveScoreWeight: round.moveScoreWeight.toString(),
     configHash: round.configHash.toString(),
+    description: round.description,
   });
 };
 export const getRoundID = async (round: ScoringInterface): Promise<number> => {
@@ -122,8 +121,7 @@ export const addRound = async (
     body: JSON.stringify({
       signature: signature,
       message: getAddRoundMessage(address),
-      timeScoreWeight: round.timeScoreWeight,
-      moveScoreWeight: round.moveScoreWeight,
+      description: round.description,
       startTime: round.startTime,
       endTime: round.endTime,
       winner: round.winner,

@@ -2,11 +2,10 @@ import { ScoringInterface } from "./types";
 
 export const DEFAULT_SCORING_CONFIG: ScoringInterface = {
   configHash: "",
-  timeScoreWeight: 1,
-  moveScoreWeight: 1,
   winner: undefined,
   startTime: new Date().getTime(),
   endTime: new Date().getTime(),
+  description: "",
 };
 
 export const getAddRoundMessage = (address: string | undefined): string => {
