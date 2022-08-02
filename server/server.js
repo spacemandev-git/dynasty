@@ -10,6 +10,7 @@ var middlewares = defaults();
 
 function simpleAuth(req, res, next) {
   console.log("req", req.body);
+  if (!req.body) return res.status(200);
   // if not post, delete, patch, or put request execute post request
   const obj = JSON.parse(fs.readFileSync("db.json", "utf8"));
 
