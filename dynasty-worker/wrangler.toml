@@ -1,0 +1,8 @@
+name = "dynasty-worker"
+main = "src/index.ts"
+compatibility_date = "2022-08-03"
+node_compat = true
+kv_namespaces = [ 
+	 { binding = "DYNASTY_ADMIN", id = "d1d2e393fae7476687385a525b127b0b", preview_id="bfaa4fba05e14d858d6ac0162f8a1823" },
+	 { binding = "DYNASTY_ROUNDS", id = "63045a5d29d241b7be9e7232704ee873", preview_id="df756cfc83b14090bcff32160b544fef"},
+]
