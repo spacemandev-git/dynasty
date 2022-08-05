@@ -2,7 +2,7 @@ import "../App.css";
 import styled from "styled-components";
 import { useAccount, useSignMessage } from "wagmi";
 import useSWR, { useSWRConfig } from "swr";
-import { addAdmin, deleteAdmin, fetcher, getAdminID } from "../lib/network";
+import { addAdmin, deleteAdmin, fetcher } from "../lib/network";
 import { getAddAdminMessage, getDeleteAdminMessage } from "../constants";
 import { useState } from "react";
 import { ErrorBanner } from "./ErrorBanner";
@@ -36,44 +36,46 @@ export const AdminManager: React.FC<Record<string, never>> = () => {
           <span>{submissionError}</span>
         </ErrorBanner>
       )}
-      <thead>
-        <tr>
-          <TableHeader>Admin Address</TableHeader>
-        </tr>
-      </thead>
-      <tbody>
-        {adminData.map((admin: { name: string }) => (
-          <RoundItem>
-            <TableCell>
-              {admin.name}
-              {admin.name === address && (
-                <span style={{ fontWeight: 600 }}> (you)</span>
-              )}
-            </TableCell>
-            <TableCell>
-              <button
-                onClick={async () => {
-                  if (submissionError) setSubmissionError(undefined);
-                  const signed = await signDeleteAdminMessage();
-                  mutate(
-                    `${import.meta.env.VITE_SERVER_URL}/admins/${admin.name}`,
-                    async () => {
-                      const res = await deleteAdmin(admin.name, address, signed);
-                      const responseError = await res.text();
-                      if (res.status !== 200 && res.status !== 201) {
-                        setSubmissionError(responseError);
+      <div>Admin Address</div>
+      <table>
+        <tbody>
+          {adminData.map((admin: { name: string }) => (
+            <RoundItem key={admin.name}>
+              <TableCell>
+                {admin.name}
+                {admin.name === address && (
+                  <span style={{ fontWeight: 600 }}> (you)</span>
+                )}
+              </TableCell>
+              <TableCell>
+                <button
+                  onClick={async () => {
+                    if (submissionError) setSubmissionError(undefined);
+                    const signed = await signDeleteAdminMessage();
+                    mutate(
+                      `${import.meta.env.VITE_SERVER_URL}/admins/${admin.name}`,
+                      async () => {
+                        const res = await deleteAdmin(
+                          admin.name,
+                          address,
+                          signed
+                        );
+                        const responseError = await res.text();
+                        if (res.status !== 200 && res.status !== 201) {
+                          setSubmissionError(responseError);
+                        }
                       }
-                    }
-                  );
-                }}
-                disabled={!isConnected}
-              >
-                Revoke
-              </button>
-            </TableCell>
-          </RoundItem>
-        ))}
-      </tbody>
+                    );
+                  }}
+                  disabled={!isConnected}
+                >
+                  Revoke
+                </button>
+              </TableCell>
+            </RoundItem>
+          ))}
+        </tbody>
+      </table>
       <div style={{ height: "16px" }} />
       <InputWithButtonContainer>
         <StyledInput

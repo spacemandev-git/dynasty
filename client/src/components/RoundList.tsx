@@ -5,7 +5,7 @@ import { formatStartTime } from "../lib/date";
 import { ScoringInterface } from "../types";
 import { useAccount, useSignMessage } from "wagmi";
 import useSWR, { useSWRConfig } from "swr";
-import { deleteRound, fetcher, generateKeyFromRound } from "../lib/network";
+import { deleteRound, fetcher } from "../lib/network";
 import { getDeleteRoundMessage } from "../constants";
 import { useState } from "react";
 import { ErrorBanner } from "./ErrorBanner";
@@ -25,7 +25,7 @@ export const RoundList: React.FC<{
     `${import.meta.env.VITE_SERVER_URL}/rounds`,
     fetcher
   );
-  console.log(serverData)
+  // console.log(serverData);
   if (!serverData) return <div>Loading...</div>;
   if (serverData.length === 0) return <div>No rounds found.</div>;
   if (error) return <div>Couldn't load previous rounds.</div>;
@@ -48,7 +48,7 @@ export const RoundList: React.FC<{
       </thead>
       <tbody>
         {serverData.map((round: ScoringInterface) => (
-          <RoundItem>
+          <RoundItem key={round.configHash}>
             <TableCell>{getConfigName(round.configHash)}</TableCell>
             <TableCell>{formatStartTime(round.startTime)}</TableCell>
             <TableCell>{formatStartTime(round.endTime)}</TableCell>
@@ -63,12 +63,17 @@ export const RoundList: React.FC<{
               <button
                 onClick={async () => {
                   if (submissionError) setSubmissionError(undefined);
-                  const roundId = generateKeyFromRound(round)
                   const signed = await signMessageAsync();
                   mutate(
-                    `${import.meta.env.VITE_SERVER_URL}/rounds/${roundId}`,
+                    `${import.meta.env.VITE_SERVER_URL}/rounds/${
+                      round.configHash
+                    }`,
                     async () => {
-                      const res = await deleteRound(roundId, address, signed);
+                      const res = await deleteRound(
+                        round.configHash,
+                        address,
+                        signed
+                      );
                       const responseError = await res.text();
                       if (res.status !== 200 && res.status !== 201) {
                         setSubmissionError(responseError);

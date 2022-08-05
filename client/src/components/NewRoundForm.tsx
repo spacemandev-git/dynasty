@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { Formik, useField, useFormikContext } from "formik";
 import {
   DEFAULT_SCORING_CONFIG,
@@ -42,12 +42,6 @@ export const NewRoundForm: React.FC<{
     undefined
   );
 
-  const oldRound = useMemo(() => {
-    if (editCurrentRound) {
-      return editCurrentRound;
-    }
-  }, []);
-
   return (
     <Formik
       initialValues={editCurrentRound ?? DEFAULT_SCORING_CONFIG}
@@ -57,8 +51,7 @@ export const NewRoundForm: React.FC<{
         mutate(`${import.meta.env.VITE_SERVER_URL}/rounds`, async () => {
           let res: Response;
           if (editCurrentRound) {
-            if (!oldRound) return;
-            res = await editRound(values, oldRound, address, signedMessage);
+            res = await editRound(values, address, signedMessage);
           } else {
             res = await addRound(values, address, signedMessage);
           }
@@ -66,6 +59,7 @@ export const NewRoundForm: React.FC<{
           console.log(res);
           console.log(responseError);
           if (res.status !== 200 && res.status !== 201) {
+            console.log(responseError);
             setSubmissionError(responseError);
           }
         });
@@ -168,13 +162,13 @@ export const NewRoundForm: React.FC<{
             {Object.keys(formik.errors).length > 0 && isConnected && (
               <ErrorBanner>
                 {Object.values(formik.errors).map((error) => (
-                  <span>🚫 {error}</span>
+                  <span key={error}>🚫 {error}</span>
                 ))}
               </ErrorBanner>
             )}
             {submissionError && isConnected && (
               <ErrorBanner>
-                <span>🚫 {submissionError}</span>
+                <span>🚫 {JSON.parse(submissionError).message}</span>
               </ErrorBanner>
             )}
             {!isConnected && (
