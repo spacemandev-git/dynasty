@@ -115,7 +115,9 @@ export async function roundValidationMiddleware(
       (endTime >= round.startTime && endTime <= round.endTime) ||
       (startTime >= round.startTime && startTime <= round.endTime) ||
       (startTime <= round.startTime && endTime >= round.endTime) ||
-      (startTime >= round.startTime && endTime >= round.endTime)
+      (startTime >= round.startTime &&
+        startTime <= round.endTime &&
+        endTime >= round.endTime)
     );
   });
 
