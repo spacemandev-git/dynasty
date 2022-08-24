@@ -1,16 +1,17 @@
-export interface ScoringInterface {
-  configHash: string;
-  description: string;
-  winner: string | undefined;
+import { BigNumber } from "ethers";
+
+export interface RoundInterface {
   startTime: number;
   endTime: number;
+  configHash: string;
+  parentAddress: string;
+  seasonId: number;
 }
 
-export type ValidationErrorType =
-  | "configHashRequired"
-  | "configHashInvalid"
-  | "configHashNotFound"
-  | "startTimeAfterEndTime"
-  | "timeOverlaps";
-
-export type ServerErrorType = "genericServerError";
+export interface RoundResponse {
+  configHash: string;
+  startTime: BigNumber;
+  endTime: BigNumber;
+  parentAddress: string;
+  seasonId: BigNumber;
+}

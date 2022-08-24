@@ -4,10 +4,14 @@
   line-height: 24px;
   font-weight: 400;
 
-  --bgColor: #FEF7E0;
-  --borderColor: #E3CCA0;
+  --bgColor: rgb(18, 22, 19);
+  --bgColor1: rgb(32, 36, 37);
+  --borderColor: rgb(63, 71, 73);
+  --borderColor1: rgb(101, 115, 119);
+  --fgColor: #fff;
+  --fgColor1: rgb(237, 237, 237);
 
-  color: #3E5164;
+  color: var(--fgColor);
   background-color: var(--bgColor);
 
   font-synthesis: none;
@@ -42,28 +46,26 @@ h1 {
   line-height: 1.1;
 }
 
-button {
-  border-radius: 4px;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-family: inherit;
+.btn {
+  padding: 1em 1.2em;
+  font-family: "Menlo", "Inconsolata", monospace;
   cursor: pointer;
-  font-weight: 600;
-  background: #40DD9B;
-  color: #0B4E32;
-  border: 2px solid #0B4E32;
-  transition: transform 0.25s ease;
+  font-weight: 500;
+  text-transform: uppercase;
+  background: rgba(45, 240, 159, 0.2);
+  color: rgba(45, 240, 159, 1);
+  border: none;
+  transition: background 0.25s ease;
 }
-button:hover {
-  transform: scale(1.03);
+.btn:hover {
+  background: rgba(45, 240, 159, 0.4);
 }
-button:disabled {
+.btn:disabled {
   cursor: not-allowed;
   background: rgba(64, 221, 155, 0.4);
-  border: 2px solid rgba(11, 78, 50, 0.4);
-  color: rgba(11, 78, 50, 0.4);
+  color: rgba(77, 202, 150, 0.734);
 }
-button:focus,
-button:focus-visible {
+.btn:focus,
+.btn:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }

@@ -3,63 +3,26 @@ import styled from "styled-components";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { RoundList } from "./components/RoundList";
 import { NewRoundForm } from "./components/NewRoundForm";
-import Modal from "react-modal";
-import { useState } from "react";
-import { ScoringInterface } from "./types";
 import { AdminManager } from "./components/AdminManager";
 
-Modal.setAppElement("#root");
-
 function App() {
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
-  const [editingRound, setEditingRound] = useState<
-    ScoringInterface | undefined
-  >(undefined);
   return (
     <Container>
-      <Modal
-        isOpen={modalOpen}
-        onRequestClose={() => {
-          setModalOpen(false);
-          setEditingRound(undefined);
-        }}
-        style={customModalStyles}
-        contentLabel="Edit Round"
-      >
-        <Title>Edit Round Info</Title>
-        <div style={{ height: "16px" }} />
-        <NewRoundForm editCurrentRound={editingRound} />
-      </Modal>
       <Nav>
-        <Title>Dynasty Admin</Title>
+        <Logo>Dynasty Admin</Logo>
         <ConnectButton />
       </Nav>
       <Title>Create new Round</Title>
       <NewRoundForm />
+      <div style={{ height: "2rem" }} />
       <Title>All rounds</Title>
-      <RoundList
-        onEditRound={(round: ScoringInterface) => {
-          setModalOpen(true);
-          setEditingRound(round);
-        }}
-      />
-
+      <RoundList />
+      <div style={{ height: "2rem" }} />
       <Title>Manage Admins</Title>
       <AdminManager />
     </Container>
   );
 }
-
-const customModalStyles = {
-  content: {
-    top: "50%",
-    left: "50%",
-    right: "auto",
-    bottom: "auto",
-    marginRight: "-50%",
-    transform: "translate(-50%, -50%)",
-  },
-};
 
 const Container = styled.div`
   display: flex;
@@ -72,11 +35,16 @@ const Container = styled.div`
 
 const Title = styled.span`
   font-family: sans-serif;
-  text-transform: uppercase;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  font-weight: 400;
   margin-bottom: 1rem;
+  color: #aaa;
   margin-top: 1rem;
+`;
+
+const Logo = styled(Title)`
+  font-family: "Menlo", "Inconsolata", monospace;
+  text-transform: uppercase;
+  color: rgba(45, 240, 159, 1);
 `;
 
 const Nav = styled.div`

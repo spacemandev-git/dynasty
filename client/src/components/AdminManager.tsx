@@ -1,33 +1,32 @@
 import "../App.css";
-import styled from "styled-components";
-import { useAccount, useSignMessage } from "wagmi";
-import useSWR, { useSWRConfig } from "swr";
-import { addAdmin, deleteAdmin, fetcher } from "../lib/network";
-import { getAddAdminMessage, getDeleteAdminMessage } from "../constants";
+import { useContractRead } from "wagmi";
 import { useState } from "react";
 import { ErrorBanner } from "./ErrorBanner";
-import { TextInput } from "./NewRoundForm";
+import { abi } from "@dfdao/gp-registry/abi/Registry.json";
+import { registry } from "@dfdao/gp-registry/deployment.json";
+import { AdminRow } from "./AdminRow";
+import { AddAdmin } from "./AddAdmin";
+import { ethers } from "ethers";
+import { RoundsContainer, TableHeader } from "./RoundList";
 
-export const AdminManager: React.FC<Record<string, never>> = () => {
-  const { mutate } = useSWRConfig();
-  const { address, isConnected } = useAccount();
+export const AdminManager: React.FC = () => {
   const [submissionError, setSubmissionError] = useState<string | undefined>(
     undefined
   );
-  const [newAdminAddress, setNewAdminAddress] = useState<string>("");
-  const { signMessageAsync } = useSignMessage({
-    message: getAddAdminMessage(address),
+
+  const {
+    data: adminData,
+    isError,
+    isLoading,
+  } = useContractRead({
+    addressOrName: registry,
+    contractInterface: abi,
+    functionName: "getAllAdmins",
+    watch: true,
   });
-  const { signMessageAsync: signDeleteAdminMessage } = useSignMessage({
-    message: getDeleteAdminMessage(address),
-  });
-  const { data: adminData, error } = useSWR(
-    `${import.meta.env.VITE_SERVER_URL}/admins`,
-    fetcher
-  );
-  if (!adminData) return <div>Loading...</div>;
+  if (!adminData || isLoading) return <div>Loading...</div>;
   if (adminData.length === 0) return <div>No admins found.</div>;
-  if (error) return <div>Couldn't load admins.</div>;
+  if (isError) return <div>Couldn't load admins.</div>;
 
   return (
     <RoundsContainer>
@@ -36,125 +35,20 @@ export const AdminManager: React.FC<Record<string, never>> = () => {
           <span>{submissionError}</span>
         </ErrorBanner>
       )}
-      <div>Admin Address</div>
-      <table>
-        <tbody>
-          {adminData.map((admin: { name: string }) => (
-            <RoundItem key={admin.name}>
-              <TableCell>
-                {admin.name}
-                {admin.name === address && (
-                  <span style={{ fontWeight: 600 }}> (you)</span>
-                )}
-              </TableCell>
-              <TableCell>
-                <button
-                  onClick={async () => {
-                    if (submissionError) setSubmissionError(undefined);
-                    const signed = await signDeleteAdminMessage();
-                    mutate(
-                      `${import.meta.env.VITE_SERVER_URL}/admins/${admin.name}`,
-                      async () => {
-                        const res = await deleteAdmin(
-                          admin.name,
-                          address,
-                          signed
-                        );
-                        const responseError = await res.text();
-                        if (res.status !== 200 && res.status !== 201) {
-                          setSubmissionError(responseError);
-                        }
-                      }
-                    );
-                  }}
-                  disabled={!isConnected}
-                >
-                  Revoke
-                </button>
-              </TableCell>
-            </RoundItem>
+      <thead>
+        <tr>
+          <TableHeader>Address</TableHeader>
+        </tr>
+      </thead>
+      <tbody>
+        {adminData
+          .filter((a) => a !== ethers.constants.AddressZero)
+          .map((admin) => (
+            <AdminRow admin={admin} />
           ))}
-        </tbody>
-      </table>
+      </tbody>
       <div style={{ height: "16px" }} />
-      <InputWithButtonContainer>
-        <StyledInput
-          placeholder="New admin address"
-          onChange={(e) => setNewAdminAddress(e.target.value)}
-          value={newAdminAddress}
-        />
-        <BlueButton
-          style={{ position: "relative" }}
-          onClick={async () => {
-            if (submissionError) setSubmissionError(undefined);
-            const signed = await signMessageAsync();
-            mutate(`${import.meta.env.VITE_SERVER_URL}/admins`, async () => {
-              const res = await addAdmin(newAdminAddress, address, signed);
-              const responseError = await res.text();
-              if (res.status !== 200 && res.status !== 201) {
-                setSubmissionError(responseError);
-              }
-            });
-          }}
-          disabled={
-            !isConnected ||
-            newAdminAddress.length === 0 ||
-            !newAdminAddress.startsWith("0x")
-          }
-        >
-          Add admin
-        </BlueButton>
-      </InputWithButtonContainer>
+      <AddAdmin onError={(error) => setSubmissionError(error)} />
     </RoundsContainer>
   );
 };
-
-const StyledInput = styled(TextInput)`
-  display: flex;
-  flex: 1;
-`;
-
-const InputWithButtonContainer = styled.div`
-  display: flex;
-  align-items: center;
-  border-radius: 4px;
-  gap: 16px;
-  padding: 8px;
-  border: 2px solid #e3cca0;
-  position: relative;
-`;
-
-const TableHeader = styled.th``;
-
-const RoundsContainer = styled.div`
-  border-collapse: collapse;
-  display: block;
-  border-spacing: 0;
-  font-size: 1rem;
-  overflow-y: auto;
-`;
-
-const RoundItem = styled.tr`
-  border: 2px solid #e3cca0;
-  width: 100%;
-  transition: all 0.2s ease;
-  &:hover {
-    background: #ead7b0;
-  }
-`;
-
-const TableCell = styled.td`
-  padding: 8px 16px;
-`;
-
-const BlueButton = styled.button`
-  background: #61c6ff;
-  border: none;
-  color: #0f5a9f;
-  border: 2px solid rgba(15, 90, 159);
-  &:disabled {
-    background: rgba(97, 198, 255, 0.4);
-    border-color: rgba(15, 90, 159, 0.4);
-    color: rgba(15, 90, 159, 0.4);
-  }
-`;

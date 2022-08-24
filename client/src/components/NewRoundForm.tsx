@@ -1,18 +1,14 @@
 import React, { useState } from "react";
 import { Formik, useField, useFormikContext } from "formik";
-import {
-  DEFAULT_SCORING_CONFIG,
-  getAddRoundMessage,
-  getEditRoundMessage,
-} from "../constants";
+import { DEFAULT_SCORING_CONFIG } from "../constants";
 import styled from "styled-components";
 import DateTimePicker from "react-datetime-picker";
-import { useAccount, useSignMessage } from "wagmi";
-import { useSWRConfig } from "swr";
+import { useAccount, useContractWrite } from "wagmi";
 import { configHashGraphQuery } from "../lib/graphql";
 import { ErrorBanner } from "./ErrorBanner";
-import { addRound, editRound } from "../lib/network";
-import { ScoringInterface } from "../types";
+import { abi } from "@dfdao/gp-registry/abi/Registry.json";
+import { registry } from "@dfdao/gp-registry/deployment.json";
+import { RoundInterface } from "../types";
 
 export const DateTimeField = ({ ...props }: any) => {
   const { setFieldValue } = useFormikContext();
@@ -28,44 +24,38 @@ export const DateTimeField = ({ ...props }: any) => {
   );
 };
 
-export const NewRoundForm: React.FC<{
-  editCurrentRound?: ScoringInterface;
-}> = ({ editCurrentRound }) => {
-  const { mutate } = useSWRConfig();
-  const { address, isConnected } = useAccount();
-  const { signMessageAsync } = useSignMessage({
-    message: editCurrentRound
-      ? getEditRoundMessage(address)
-      : getAddRoundMessage(address),
-  });
+export const NewRoundForm: React.FC = () => {
   const [submissionError, setSubmissionError] = useState<string | undefined>(
     undefined
   );
+  const { isConnected } = useAccount();
+
+  const { write: addRound } = useContractWrite({
+    mode: "recklesslyUnprepared",
+    addressOrName: registry,
+    contractInterface: abi,
+    functionName: "addGrandPrix",
+    onError: (error) => {
+      setSubmissionError(error.message);
+    },
+  });
 
   return (
     <Formik
-      initialValues={editCurrentRound ?? DEFAULT_SCORING_CONFIG}
-      onSubmit={async (values) => {
-        if (submissionError) setSubmissionError(undefined);
-        const signedMessage = await signMessageAsync();
-        mutate(`${import.meta.env.VITE_SERVER_URL}/rounds`, async () => {
-          let res: Response;
-          if (editCurrentRound) {
-            res = await editRound(values, address, signedMessage);
-          } else {
-            res = await addRound(values, address, signedMessage);
-          }
-          const responseError = await res.text();
-          console.log(res);
-          console.log(responseError);
-          if (res.status !== 200 && res.status !== 201) {
-            console.log(responseError);
-            setSubmissionError(responseError);
-          }
+      initialValues={DEFAULT_SCORING_CONFIG}
+      onSubmit={async (values: RoundInterface) => {
+        addRound({
+          recklesslySetUnpreparedArgs: [
+            values.startTime,
+            values.endTime,
+            values.configHash,
+            values.parentAddress,
+            values.seasonId,
+          ],
         });
       }}
       validate={async (values) => {
-        const errors = {} as any;
+        const errors = {} as { [key: string]: string };
 
         // Validate configHash
         const configHashStartsWith0x = values.configHash.startsWith("0x");
@@ -83,10 +73,6 @@ export const NewRoundForm: React.FC<{
           errors["configHash"] = "Config hash is required.";
         }
 
-        if (values.description.length === 0) {
-          errors["description"] = "Description is required.";
-        }
-
         // validate start and end times
         if (values.startTime > values.endTime) {
           errors["startTime"] = "Start time must be before end time.";
@@ -95,21 +81,20 @@ export const NewRoundForm: React.FC<{
           errors["startEndEqual"] =
             "Start time and end time must be different.";
         }
+        if (!values.seasonId) {
+          errors["seasonId"] = "Season is required.";
+        }
+        if (!values.parentAddress) {
+          errors["parentAddress"] = "Map address is required.";
+        }
+        if (!values.parentAddress.startsWith("0x")) {
+          errors["parentAddressPrefix"] = "Map address must start with 0x";
+        }
         return errors;
       }}
     >
       {(formik) => (
         <Form onSubmit={formik.handleSubmit}>
-          <FormItem>
-            <Label>Description</Label>
-            <TextAreaInput
-              name="description"
-              id="description"
-              value={formik.values.description}
-              onChange={formik.handleChange}
-              placeholder="A short description of the round ruleset."
-            />
-          </FormItem>
           <div
             style={{
               display: "flex",
@@ -139,25 +124,36 @@ export const NewRoundForm: React.FC<{
               placeholder="0x..."
             />
           </FormItem>
-          {editCurrentRound && (
-            <FormItem>
-              <Label>Winner</Label>
-              <TextInput
-                type="text"
-                id="winner"
-                name="winner"
-                value={formik.values.winner}
-                onChange={formik.handleChange}
-                placeholder="0x..."
-              />
-            </FormItem>
-          )}
+          <FormItem>
+            <Label>Map Address</Label>
+            <TextInput
+              type="text"
+              id="parentAddress"
+              name="parentAddress"
+              value={formik.values.parentAddress}
+              onChange={formik.handleChange}
+              placeholder="0xmapAddress..."
+            />
+          </FormItem>
+          <FormItem>
+            <Label>Season</Label>
+            <TextInput
+              type="number"
+              id="seasonId"
+              name="seasonId"
+              min="1"
+              value={formik.values.seasonId}
+              onChange={formik.handleChange}
+              placeholder="1"
+            />
+          </FormItem>
           <FormItem>
             <button
               disabled={!isConnected || Object.keys(formik.errors).length > 0}
+              className="btn"
               type="submit"
             >
-              {editCurrentRound ? "Edit Round" : "Submit new round"}
+              Submit new round
             </button>
             {Object.keys(formik.errors).length > 0 && isConnected && (
               <ErrorBanner>
@@ -168,13 +164,13 @@ export const NewRoundForm: React.FC<{
             )}
             {submissionError && isConnected && (
               <ErrorBanner>
-                <span>🚫 {JSON.parse(submissionError).message}</span>
+                <span>🚫 {submissionError}</span>
               </ErrorBanner>
             )}
             {!isConnected && (
               <span>
-                Connect wallet. Only an authenticated community admin can
-                add/remove new rounds.
+                Connect wallet. Only a community admin can add/remove new
+                rounds.
               </span>
             )}
           </FormItem>
@@ -194,41 +190,37 @@ const FormItem = styled.div`
 
 export const TextInput = styled.input`
   padding: 0.5rem 1rem;
-  border: 2px solid #e5e5e5;
-  border-radius: 4px;
-  background: #fff;
+  border: 1px solid rgb(53, 71, 73);
+  border-radius: 2px;
+  background: none;
+  color: #fff;
   transition: border-color 0.2s ease-in-out;
   &:hover {
-    border-color: #349dff;
-  }
-`;
-
-const TextAreaInput = styled.textarea`
-  padding: 0.5rem 1rem;
-  border: 2px solid #e5e5e5;
-  border-radius: 4px;
-  background: #fff;
-  transition: border-color 0.2s ease-in-out;
-  font-family: sans-serif;
-  &:hover {
-    border-color: #349dff;
+    border-color: rgba(45, 240, 159, 0.4);
   }
 `;
 
 const Label = styled.label`
   width: 100%;
   text-align: left;
+  font-weight: 400;
+  font-family: "Menlo", "Inconsolata", monospace;
+  text-transform: uppercase;
+  font-size: 0.8em;
+  color: #aaa;
 `;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  border: 1px solid #e3cca0;
-  border-radius: 0.5rem;
+  border: 1px solid rgb(53, 71, 73);
+  background: rgb(32, 36, 37);
+  border-radius: 6px;
   padding: 1rem;
   align-items: center;
   justify-content: center;
+  width: 600px;
 `;
 
 const Picker = styled(DateTimePicker)`
@@ -236,21 +228,31 @@ const Picker = styled(DateTimePicker)`
   align-items: flex-start;
   .react-datetime-picker__wrapper {
     flex-grow: 0;
-    border: 2px solid #e5e5e5;
-    border-radius: 4px;
-    background: #fff;
+    border-radius: 2px;
+    border: 1px solid rgb(53, 71, 73);
+    background: none;
+    color: #fff;
     transition: border-color 0.2s ease-in-out;
     &:hover {
-      border-color: #349dff;
+      border-color: rgba(45, 240, 159, 0.4);
     }
     .react-datetime-picker__inputGroup {
       padding: 0.5rem;
-      color: #3e5164;
+      color: #fff;
+    }
+    .react-datetime-picker__inputGroup__input {
+      color: #fff;
+    }
+    .react-datetime-picker__button__icon {
+      color: #fff;
+      stroke: #fff;
+    }
+    .react-datetime-picker__clear-button {
+      color: #fff;
     }
   }
   .react-calendar {
     border-radius: 4px;
-    border: 2px solid #349dff;
     padding: 0.5rem;
   }
 `;

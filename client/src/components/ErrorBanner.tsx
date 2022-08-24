@@ -13,6 +13,6 @@ const ErrorBannerContainer = styled.div`
   align-items: flex-start;
   border-radius: 4px;
   padding: 0.5rem 1rem;
-  background: #ffc46b;
-  color: #a05419;
+  border: 1px solid #ffc46b;
+  color: #ffc46b;
 `;

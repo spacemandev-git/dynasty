@@ -1,101 +1,71 @@
 import "../App.css";
 import styled from "styled-components";
-import { getConfigName } from "../lib/getConfigName";
-import { formatStartTime } from "../lib/date";
-import { ScoringInterface } from "../types";
-import { useAccount, useSignMessage } from "wagmi";
-import useSWR, { useSWRConfig } from "swr";
-import { deleteRound, fetcher } from "../lib/network";
-import { getDeleteRoundMessage } from "../constants";
-import { useState } from "react";
+import { useContractRead } from "wagmi";
+import { abi } from "@dfdao/gp-registry/abi/Registry.json";
+import { registry } from "@dfdao/gp-registry/deployment.json";
 import { ErrorBanner } from "./ErrorBanner";
+import { constants, ethers, utils } from "ethers";
+import { RoundRow } from "./RoundRow";
+import { RoundResponse } from "../types";
 
-export const RoundList: React.FC<{
-  onEditRound: (round: ScoringInterface) => void;
-}> = ({ onEditRound }) => {
-  const { mutate } = useSWRConfig();
-  const { address, isConnected } = useAccount();
-  const [submissionError, setSubmissionError] = useState<string | undefined>(
-    undefined
-  );
-  const { signMessageAsync } = useSignMessage({
-    message: getDeleteRoundMessage(address),
+export const RoundList: React.FC = () => {
+  const {
+    data: roundData,
+    isError,
+    isLoading,
+  } = useContractRead({
+    addressOrName: registry,
+    contractInterface: abi,
+    functionName: "getAllGrandPrix",
+    watch: true,
   });
-  const { data: serverData, error } = useSWR(
-    `${import.meta.env.VITE_SERVER_URL}/rounds`,
-    fetcher
-  );
-  // console.log(serverData);
-  if (!serverData) return <div>Loading...</div>;
-  if (serverData.length === 0) return <div>No rounds found.</div>;
-  if (error) return <div>Couldn't load previous rounds.</div>;
+
+  if (!roundData || isLoading) return <div>Loading...</div>;
+  if (
+    roundData.filter((r) => r.parentAddress !== constants.AddressZero)
+      .length === 0
+  )
+    return (
+      <div
+        style={{ fontFamily: "Menlo, monospace", textTransform: "uppercase" }}
+      >
+        No rounds found.
+      </div>
+    );
+  if (isError) return <div>Couldn't load previous rounds.</div>;
 
   return (
     <RoundsContainer>
-      {submissionError && (
-        <ErrorBanner>
-          <span>{submissionError}</span>
-        </ErrorBanner>
-      )}
       <thead>
         <tr>
           <TableHeader>Name</TableHeader>
           <TableHeader>Start</TableHeader>
           <TableHeader>End</TableHeader>
-          <TableHeader>Description</TableHeader>
-          <TableHeader>Winner</TableHeader>
+          <TableHeader>Season</TableHeader>
         </tr>
       </thead>
       <tbody>
-        {serverData.map((round: ScoringInterface) => (
-          <RoundItem key={round.configHash}>
-            <TableCell>{getConfigName(round.configHash)}</TableCell>
-            <TableCell>{formatStartTime(round.startTime)}</TableCell>
-            <TableCell>{formatStartTime(round.endTime)}</TableCell>
-            <TableCell>{round.description.slice(0, 24) + "..."}</TableCell>
-            <TableCell>
-              {round.winner && round.winner.length > 0 ? round.winner : "None"}
-            </TableCell>
-            <TableCell>
-              <MutedButton onClick={() => onEditRound(round)}>Edit</MutedButton>
-            </TableCell>
-            <TableCell>
-              <button
-                onClick={async () => {
-                  if (submissionError) setSubmissionError(undefined);
-                  const signed = await signMessageAsync();
-                  mutate(
-                    `${import.meta.env.VITE_SERVER_URL}/rounds/${
-                      round.configHash
-                    }`,
-                    async () => {
-                      const res = await deleteRound(
-                        round.configHash,
-                        address,
-                        signed
-                      );
-                      const responseError = await res.text();
-                      if (res.status !== 200 && res.status !== 201) {
-                        setSubmissionError(responseError);
-                      }
-                    }
-                  );
-                }}
-                disabled={!isConnected}
-              >
-                Delete
-              </button>
-            </TableCell>
-          </RoundItem>
-        ))}
+        {roundData
+          .filter((r) => r.parentAddress !== ethers.constants.AddressZero)
+          .map((round: RoundResponse, i: number) => (
+            <RoundRow round={round} key={i} />
+          ))}
       </tbody>
     </RoundsContainer>
   );
 };
 
-const TableHeader = styled.th``;
+export const TableHeader = styled.th`
+  font-family: "Menlo", "Inconsolata", monospace;
+  text-transform: uppercase;
+  font-weight: 400;
+  color: rgb(100, 115, 120);
+  margin-bottom: 1rem;
+  text-align: left;
+  padding: 8px 16px;
+`;
 
-const RoundsContainer = styled.div`
+export const RoundsContainer = styled.div`
   border-collapse: collapse;
   display: block;
   border-spacing: 0;
@@ -103,27 +73,16 @@ const RoundsContainer = styled.div`
   overflow-y: auto;
 `;
 
-const RoundItem = styled.tr`
-  border: 2px solid #e3cca0;
+export const RoundItem = styled.tr`
+  border: 1px solid rgb(53, 71, 73);
   width: 100%;
   transition: all 0.2s ease;
   &:hover {
-    background: #ead7b0;
+    background: rgb(32, 36, 37);
   }
 `;
 
-const TableCell = styled.td`
+export const TableCell = styled.td`
   padding: 8px 16px;
-`;
-
-const MutedButton = styled.button`
-  background: #61c6ff;
-  border: none;
-  color: #0f5a9f;
-  border: 2px solid rgba(15, 90, 159);
-  &:disabled {
-    background: rgba(97, 198, 255, 0.4);
-    border-color: rgba(15, 90, 159, 0.4);
-    color: rgba(15, 90, 159, 0.4);
-  }
+  text-align: left;
 `;

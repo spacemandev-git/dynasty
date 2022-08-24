@@ -23,8 +23,10 @@
     }
   },
   "lint-staged": {
+    "**/*.{ts,tsx,md}": [
+      "eslint --cache --fix"
+    ],
     "**/*.{ts,tsx,css,md}": [
-      "eslint --cache --fix",
       "prettier --ignore-path .prettierignore --write"
     ]
   },
