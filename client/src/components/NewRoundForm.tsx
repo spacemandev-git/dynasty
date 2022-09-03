@@ -6,8 +6,8 @@ import DateTimePicker from "react-datetime-picker";
 import { useAccount, useContractWrite } from "wagmi";
 import { configHashGraphQuery } from "../lib/graphql";
 import { ErrorBanner } from "./ErrorBanner";
-import { abi } from "@dfdao/gp-registry/abi/Registry.json";
-import { registry } from "@dfdao/gp-registry/deployment.json";
+import { abi } from "@dfdao/dynasty/abi/Registry.json";
+import { registry } from "@dfdao/dynasty/deployment.json";
 import { RoundInterface } from "../types";
 
 export const DateTimeField = ({ ...props }: any) => {
@@ -25,6 +25,7 @@ export const DateTimeField = ({ ...props }: any) => {
 };
 
 export const NewRoundForm: React.FC = () => {
+  console.log(`registry address`, registry);
   const [submissionError, setSubmissionError] = useState<string | undefined>(
     undefined
   );
@@ -121,7 +122,7 @@ export const NewRoundForm: React.FC = () => {
               name="configHash"
               value={formik.values.configHash}
               onChange={formik.handleChange}
-              placeholder="0x..."
+              placeholder="0xfe719a3cfccf2bcfa23f71f0af80a931eda4f4197331828d728b7505a6156930"
             />
           </FormItem>
           <FormItem>
@@ -132,7 +133,7 @@ export const NewRoundForm: React.FC = () => {
               name="parentAddress"
               value={formik.values.parentAddress}
               onChange={formik.handleChange}
-              placeholder="0xmapAddress..."
+              placeholder="0xb96f4057fc8d90d47f0265414865f998fe356da1"
             />
           </FormItem>
           <FormItem>

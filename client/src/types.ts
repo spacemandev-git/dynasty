@@ -15,3 +15,15 @@ export interface RoundResponse {
   parentAddress: string;
   seasonId: BigNumber;
 }
+
+export interface MintInterface {
+  configHash: string;
+  playerAddress: string;
+  seasonId: number;
+}
+
+export interface NFTList {
+  id: number;
+  uri: string;
+  owner: string;
+}

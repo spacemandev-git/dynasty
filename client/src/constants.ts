@@ -1,9 +1,17 @@
-import { RoundInterface } from "./types";
+import { RoundInterface, MintInterface } from "./types";
 
 export const DEFAULT_SCORING_CONFIG: RoundInterface = {
-  configHash: "",
+  configHash:
+    "0xfe719a3cfccf2bcfa23f71f0af80a931eda4f4197331828d728b7505a6156930",
   startTime: new Date().getTime(),
   endTime: new Date().getTime(),
   seasonId: 1,
-  parentAddress: "",
+  parentAddress: "0xb96f4057fc8d90d47f0265414865f998fe356da1",
+};
+
+export const DEFAULT_NFT_CONFIG: MintInterface = {
+  configHash:
+    "0xfe719a3cfccf2bcfa23f71f0af80a931eda4f4197331828d728b7505a6156930",
+  seasonId: 1,
+  playerAddress: "0xb96f4057fc8d90d47f0265414865f998fe356da1",
 };

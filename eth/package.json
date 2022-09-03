@@ -1,0 +1,53 @@
+{
+  "name": "@dfdao/dynasty",
+  "type": "module",
+  "version": "1.1.0",
+  "license": "GPL-3.0",
+  "files": [
+    "src/**/*.sol",
+    "types/",
+    "deployment.json",
+    "abi/*.json"
+  ],
+  "devDependencies": {
+    "@typechain/ethers-v5": "^10.1.0",
+    "@types/node": "^18.0.3",
+    "dotenv-cli": "^6.0.0",
+    "ds-test": "https://github.com/dapphub/ds-test.git#9310e879db8ba3ea6d5c6489a579118fd264a3f5",
+    "forge-std": "https://github.com/foundry-rs/forge-std.git#2da2f4a3470b87c94e5616c4297f3651179950ed",
+    "prettier": "^2.7.1",
+    "prettier-plugin-solidity": "^1.0.0-beta.19",
+    "ts-node": "^10.8.2",
+    "typechain": "^8.1.0",
+    "typescript": "^4.7.4",
+    "zx": "^7.0.8"
+  },
+  "repository": "git+https://github.com/dfdao/dynasty.git",
+  "bugs": {
+    "url": "https://github.com/dfdao/dynasty/issues"
+  },
+  "scripts": {
+    "setup": "forge clean && forge build",
+    "types": "yarn typechain --target ethers-v5 --out-dir typechain ./out/**/*.json --show-stack-traces",
+    "test": "forge test",
+    "format": "prettier --write src/**/*.sol && prettier --write src/*.sol",
+    "bindings": "typechain --target=ethers-v5 --out-dir types out/Registry.sol/Registry.json out/NFT.sol/NFT.json",
+    "deploy-local": "wait-on tcp:8545 forge script script/Registry.s.sol:DeployRegistry --rpc-url http://localhost:8545  --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --broadcast",
+    "export:abi": "forge build && cp out/Registry.sol/Registry.json abi/Registry.json && cp out/NFT.sol/NFT.json abi/NFT.json",
+    "deploy:dev": "dotenv  -e .env.local -- zx deploy.mjs && yarn bindings && yarn export:abi && yarn copy:client",
+    "deploy:hardhat": "dotenv  -e .env.hardhat -- zx deploy.mjs && yarn bindings && yarn export:abi && yarn copy:client",
+    "deploy:prod": "dotenv -e .env.production -- zx deploy.mjs && yarn bindings && yarn export:abi && yarn copy:client",
+    "start:node": "anvil -m 'change typical hire slam amateur loan grid fix drama electric seed label'",
+    "copy:client": "cp deployment.json ../client/node_modules/@dfdao/dynasty && cp -r abi ../client/node_modules/@dfdao/dynasty && cp -r types ../client/node_modules/@dfdao/dynasty"
+  },
+  "dependencies": {
+    "cross-fetch": "^3.1.5",
+    "dotenv": "^16.0.1",
+    "mime": "^3.0.0",
+    "nft.storage": "^7.0.0",
+    "node-fetch": "^3.2.10",
+    "run-pty": "^3.0.0",
+    "solmate": "^6.5.0",
+    "wait-on": "^6.0.1"
+  }
+}

@@ -2,14 +2,17 @@ import "../App.css";
 import { useContractRead } from "wagmi";
 import { useState } from "react";
 import { ErrorBanner } from "./ErrorBanner";
-import { abi } from "@dfdao/gp-registry/abi/Registry.json";
-import { registry } from "@dfdao/gp-registry/deployment.json";
+import { abi as RegistryAbi } from "@dfdao/dynasty/abi/Registry.json";
+import { abi as NFTAbi } from "@dfdao/dynasty/abi/NFT.json";
+import { registry, nft } from "@dfdao/dynasty/deployment.json";
 import { AdminRow } from "./AdminRow";
 import { AddAdmin } from "./AddAdmin";
 import { ethers } from "ethers";
 import { RoundsContainer, TableHeader } from "./RoundList";
 
-export const AdminManager: React.FC = () => {
+export const AdminManager: React.FC<{ nftContract: boolean }> = ({
+  nftContract,
+}) => {
   const [submissionError, setSubmissionError] = useState<string | undefined>(
     undefined
   );
@@ -19,8 +22,8 @@ export const AdminManager: React.FC = () => {
     isError,
     isLoading,
   } = useContractRead({
-    addressOrName: registry,
-    contractInterface: abi,
+    addressOrName: nftContract ? nft : registry,
+    contractInterface: nftContract ? NFTAbi : RegistryAbi,
     functionName: "getAllAdmins",
     watch: true,
   });
@@ -36,19 +39,24 @@ export const AdminManager: React.FC = () => {
         </ErrorBanner>
       )}
       <thead>
-        <tr>
-          <TableHeader>Address</TableHeader>
-        </tr>
+        <tbody>
+          <tr>
+            <TableHeader>Address</TableHeader>
+          </tr>
+        </tbody>
       </thead>
       <tbody>
         {adminData
           .filter((a) => a !== ethers.constants.AddressZero)
           .map((admin) => (
-            <AdminRow admin={admin} />
+            <AdminRow key={admin} admin={admin} />
           ))}
       </tbody>
       <div style={{ height: "16px" }} />
-      <AddAdmin onError={(error) => setSubmissionError(error)} />
+      <AddAdmin
+        nftContract={nftContract}
+        onError={(error) => setSubmissionError(error)}
+      />
     </RoundsContainer>
   );
 };

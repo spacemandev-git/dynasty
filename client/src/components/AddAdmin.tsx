@@ -1,27 +1,35 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { useAccount, useContractWrite, usePrepareContractWrite } from "wagmi";
-import { abi } from "@dfdao/gp-registry/abi/Registry.json";
-import { registry } from "@dfdao/gp-registry/deployment.json";
+import {
+  useAccount,
+  useContractRead,
+  useContractWrite,
+  usePrepareContractWrite,
+} from "wagmi";
+import { abi as RegistryAbi } from "@dfdao/dynasty/abi/Registry.json";
+import { abi as NFTAbi } from "@dfdao/dynasty/abi/NFT.json";
+import { registry, nft } from "@dfdao/dynasty/deployment.json";
+
 import { TextInput } from "./NewRoundForm";
 
-export const AddAdmin: React.FC<{ onError: (error: string) => void }> = ({
-  onError,
-}) => {
-  const { isConnected } = useAccount();
+export const AddAdmin: React.FC<{
+  nftContract: boolean;
+  onError: (error: string) => void;
+}> = ({ onError, nftContract }) => {
+  const { isConnected, address } = useAccount();
 
   const [newAdminAddress, setNewAdminAddress] = useState<string>("");
 
   const { config } = usePrepareContractWrite({
-    addressOrName: registry,
-    contractInterface: abi,
+    addressOrName: nftContract ? nft : registry,
+    contractInterface: nftContract ? NFTAbi : RegistryAbi,
     functionName: "setAdmin",
     args: [newAdminAddress, true],
   });
 
   const { writeAsync: addAdminWrite } = useContractWrite({
     ...config,
-    onError: (error) => onError(error.message),
+    onError: (error) => onError(`adminWrite ${error.message}`),
   });
 
   return (
