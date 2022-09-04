@@ -1,6 +1,6 @@
 import { createClient } from "urql";
 
-export const GRAPHQL_URL = import.meta.env.VITE_GRAPH_URL ?? 'http://localhost:8000/subgraphs/name/df';
+export const GRAPHQL_URL = import.meta.env.VITE_GRAPH_URL;
 export const BLOCK_EXPLORER_URL = import.meta.env.VITE_BLOCK_EXPLORER_URL;
 export const BLOCK_ACCOUNT_URL = import.meta.env.VITE_BLOCK_ACCOUNT_URL;
 

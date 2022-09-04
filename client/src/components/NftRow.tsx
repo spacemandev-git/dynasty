@@ -8,7 +8,7 @@ import { BLOCK_ACCOUNT_URL } from "../lib/graphql";
 function ipfsLinkToHttpLink(ipfs: string) {
   const ipfsLinkChars = 7;
   const ipfsHash = ipfs.slice(ipfsLinkChars);
-  const httpIpfsUrl = `https://nftstorage.link/ipfs/` + ipfsHash;
+  const httpIpfsUrl = `https://ipfs.io/ipfs/` + ipfsHash;
   return httpIpfsUrl;
 }
 

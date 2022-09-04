@@ -66,11 +66,11 @@ export const NewNFT: React.FC = () => {
           if (!configHashStartsWith0x) {
             errors["configHashPrefix"] = "Config hash must start with 0x";
           } else {
-            // const error = await configHashGraphQuery(values.configHash);
-            // if (error) {
-            //   errors["configHashGraphQL"] =
-            //     "Config hash doesn't exist on-chain.";
-            // }
+            const error = await configHashGraphQuery(values.configHash);
+            if (error) {
+              errors["configHashGraphQL"] =
+                "Config hash doesn't exist on-chain.";
+            }
           }
         } else {
           errors["configHash"] = "Config hash is required.";
